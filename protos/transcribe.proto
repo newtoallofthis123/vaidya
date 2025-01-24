@@ -1,0 +1,18 @@
+syntax = "proto3";
+
+message AudioFile {
+  string filename = 1;
+  string format = 2;
+  uint32 sample_rate = 3;
+  uint32 channels = 4;
+  bytes audio_data = 5;
+}
+
+service AudioService {
+  rpc TranscribeAudio(stream AudioFile) returns (stream TranscribeResponse);
+}
+
+message TranscribeResponse {
+  string status = 1;
+  string message = 2;
+}

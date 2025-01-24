@@ -1,0 +1,19 @@
+syntax = "proto3";
+
+service TokensServer {
+  rpc FindSymptoms(SymptomsRequest) returns (stream Symptom);
+  rpc SayHello(HelloRequest) returns (Hello);
+}
+
+message HelloRequest { string name = 1; }
+
+message Hello { string res = 1; }
+
+message SymptomsRequest { string text = 1; }
+
+message Symptom {
+  string type = 1;
+  string name = 2;
+  string loc = 3;
+  float confidence = 4;
+}
