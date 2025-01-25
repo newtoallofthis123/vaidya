@@ -1,0 +1,49 @@
+syntax = "proto3";
+
+option go_package = "github.com/newtoallofthis123/patients/types";
+
+service PatientService {
+  rpc NewPatient(PatientRequest) returns (Patient);
+  rpc GetPatient(GetPatientRequest) returns (Patient);
+  rpc Ping(GetPatientRequest) returns (PingRes);
+}
+
+message GetPatientRequest { string patient_id = 1; }
+message PingRes { string res = 1; }
+
+message PatientRequest {
+  string first_name = 1;
+  string last_name = 2;
+  uint32 age = 3;
+  string gender = 4;
+  string address = 5;
+  string identity = 6;
+  string phone = 7;
+  string email = 8;
+  string description = 9;
+  bool recurring = 10;
+}
+
+message Patient {
+  string patient_id = 1;
+  string first_name = 2;
+  string last_name = 3;
+  uint32 age = 4;
+  string gender = 5;
+  string address = 6;
+  string identity = 7;
+  string phone = 8;
+  string email = 9;
+  string description = 10;
+  bool recurring = 11;
+}
+
+message PatientRecord {
+  Patient patient = 1;
+  string session_id = 2;
+  repeated string problems = 3;
+  repeated string medicines = 4;
+  repeated string conditions = 5;
+  string diagnosis = 6;
+  string next_session = 7;
+}

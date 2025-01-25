@@ -1,5 +1,7 @@
 syntax = "proto3";
 
+option go_package = "github.com/newtoallofthis123/patients/types";
+
 message AudioFile {
   string filename = 1;
   string format = 2;
@@ -9,7 +11,7 @@ message AudioFile {
 }
 
 service AudioService {
-  rpc TranscribeAudio(stream AudioFile) returns (stream TranscribeResponse);
+  rpc TranscribeAudio(stream AudioFile) returns (TranscribeResponse);
 }
 
 message TranscribeResponse {

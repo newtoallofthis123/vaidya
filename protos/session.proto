@@ -1,0 +1,14 @@
+syntax = "proto3";
+
+service SessionService {
+  rpc NewSession(SymptomsRequest) returns (SessionResponse);
+}
+
+message SessionRequest {
+    bool recurring = 1;
+}
+
+message SessionResponse {
+    string session_id = 1;
+    Patient patient = 2;
+}

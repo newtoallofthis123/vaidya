@@ -6,6 +6,7 @@ import grpc
 import transcribe_pb2
 import transcribe_pb2_grpc
 from whisper import WhisperTranscribe
+from pydub import AudioSegment
 
 logging.basicConfig(
     level=logging.INFO,
@@ -32,46 +33,39 @@ class AudioServiceServicer(transcribe_pb2_grpc.AudioServiceServicer):
 
     def TranscribeAudio(self, request_iterator, context):
         audio_data = bytearray()
-        chunk_size = None
+        text = ""
 
         for req in request_iterator:
             audio_data.extend(req.audio_data)
 
-            if chunk_size is None:
-                chunk_size = self.cal_chunk_size(audio_data)
-                if chunk_size is None:
-                    continue
+        print("Starting to transcribe")
+        try:
+            audio = AudioSegment.from_file(io.BytesIO(audio_data), format=req.format)
+            audio = audio.set_frame_rate(16000).set_channels(1).set_sample_width(2)
+            wave_data = audio.export(format="wav").read()
+            chunk_size = self.cal_chunk_size(wave_data)
 
-            while len(audio_data) >= chunk_size:
-                chunk = audio_data[:chunk_size]
-                audio_data = audio_data[chunk_size:]
+            while len(wave_data) >= chunk_size:
+                chunk = wave_data[:chunk_size]
+                wave_data = wave_data[chunk_size:]
 
                 self.logger.info("Transcribing 30-second chunk...")
-                try:
-                    transcription = self.transcriber.transcribe_audio(chunk)
-                    yield transcribe_pb2.TranscribeResponse(
-                        status="Success", message=transcription
-                    )
-                except Exception as e:
-                    self.logger.error(f"Error during transcription: {e}")
-                    context.set_code(grpc.StatusCode.INTERNAL)
-                    context.set_details(f"Error: {e}")
-                    yield transcribe_pb2.TranscribeResponse(
-                        status="Error", message=str(e)
-                    )
+                transcription = self.transcriber.transcribe_audio(chunk)
+                text += transcription
 
-        if audio_data:
-            self.logger.info("Transcribing remaining audio...")
-            try:
-                transcription = self.transcriber.transcribe_audio(audio_data)
-                yield transcribe_pb2.TranscribeResponse(
-                    status="Success", message=transcription
-                )
-            except Exception as e:
-                self.logger.error(f"Error during transcription: {e}")
-                context.set_code(grpc.StatusCode.INTERNAL)
-                context.set_details(f"Error: {e}")
-                yield transcribe_pb2.TranscribeResponse(status="Error", message=str(e))
+            if wave_data:
+                self.logger.info("Transcribing remaining audio...")
+                text += self.transcriber.transcribe_audio(wave_data)
+
+            print(text)
+            return transcribe_pb2.TranscribeResponse(status="Success", message=text)
+        except Exception as e:
+            self.logger.error(f"Error during transcription: {e}")
+            # context.set_code(grpc.StatusCode.INTERNAL)
+            # context.set_details(f"Error: {e}")
+            return transcribe_pb2.TranscribeResponse(
+                status="Error", message=str(e)
+            )
 
 
 def serve():
