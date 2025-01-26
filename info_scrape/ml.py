@@ -4,8 +4,6 @@ def get_pipe():
     pipe = pipeline("token-classification", model="ankitcodes/pii_model")
     return pipe
 
-# results = pipe("Hello! I am Ishan Joshi, a student from India. I currently live in Mayuri Nagar, Hyderbad. I was born on 9th december 2004. My phone number is +919014678452 and email is noobscience123@gmail.com")
-
 def parse_entities(entity_list):
     parsed_data = {}
     current_entity = None

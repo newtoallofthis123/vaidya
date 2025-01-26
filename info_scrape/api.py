@@ -1,7 +1,7 @@
 from flask import Flask, jsonify, request
 from flask_cors import CORS
 
-from info_scrape.ml import get_pipe, parse_entities
+from ml import get_pipe, parse_entities
 
 app = Flask(__name__)
 CORS(app)
