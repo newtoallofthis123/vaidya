@@ -4,6 +4,10 @@ import grpc
 import ml_pb2
 import ml_pb2_grpc
 from parsers.symptoms import SymptomTokenizer
+logging.basicConfig(
+    level=logging.INFO,
+    format="%(asctime)s - %(levelname)s - %(message)s",
+)
 
 
 class TokensServerServicer(ml_pb2_grpc.TokensServerServicer):
