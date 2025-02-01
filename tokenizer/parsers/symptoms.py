@@ -1,12 +1,15 @@
 from transformers import AutoTokenizer, AutoModelForTokenClassification
 from transformers import pipeline
 
+
 class SymptomTokenizer:
     """
     Initializes the SymptomTokenizer with a pre-trained model and tokenizer.
     """
+
     def __init__(self) -> None:
         self.model_name = "HUMADEX/english_medical_ner"
+        print("Hello World")
 
         self.tokenizer = AutoTokenizer.from_pretrained(self.model_name)
         self.model = AutoModelForTokenClassification.from_pretrained(self.model_name)
@@ -30,19 +33,19 @@ class SymptomTokenizer:
         cur = None
 
         for token in tokens:
-            tag = token['entity']
+            tag = token["entity"]
 
-            if tag.startswith('B'):
+            if tag.startswith("B"):
                 if cur is not None:
                     cur.append(token)
                     problems.append(cur)
                     cur = None
                 cur = [token]
-            elif tag.startswith('I'):
+            elif tag.startswith("I"):
                 if cur is None:
                     raise ValueError("Found I-PROBLEM without preceding B-PROBLEM")
                 cur.append(token)
-            elif tag.startswith('E') or tag.startswith('S'):
+            elif tag.startswith("E") or tag.startswith("S"):
                 if cur is None:
                     cur = []
                 cur.append(token)
@@ -72,8 +75,12 @@ class SymptomTokenizer:
 
         res = {"symptoms": [], "treatments": [], "tests": []}
         for group in entites:
-            token = {"name": "", "loc": "", "confidences": [], }
-            for i,e in enumerate(group):
+            token = {
+                "name": "",
+                "loc": "",
+                "confidences": [],
+            }
+            for i, e in enumerate(group):
                 word = e["word"]
                 if not word.startswith("#"):
                     word += " "
@@ -85,7 +92,7 @@ class SymptomTokenizer:
                 if i == len(group) - 1:
                     token["loc"] += str(e["end"])
                 token["confidences"].append(e["score"])
-            token["name"]=token["name"][:-1]
+            token["name"] = token["name"][:-1]
             token["score"] = sum(token["confidences"]) / len(token["confidences"])
             if group[0]["entity"].endswith("PROBLEM"):
                 res["symptoms"].append(token)

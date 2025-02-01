@@ -13,9 +13,7 @@ message Hello { string res = 1; }
 
 message SymptomsRequest { string text = 1; }
 
-message SymptomsResponse {
-    repeated Symptom symptoms = 1;
-}
+message SymptomsResponse { repeated Symptom symptoms = 1; }
 
 message Symptom {
   string type = 1;

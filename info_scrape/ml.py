@@ -1,10 +1,23 @@
 from transformers import pipeline
 
+
 def get_pipe():
     pipe = pipeline("token-classification", model="ankitcodes/pii_model")
     return pipe
 
+
 def parse_entities(entity_list):
+    """
+    Parse list of entity predictions from token classification into key-value pairs.
+
+    Args:
+        entity_list (list): List of dictionaries containing token classification results
+            with 'entity' and 'word' keys for each token
+
+    Returns:
+        dict: Dictionary mapping entity types to their combined token values
+              with word piece tokens properly joined
+    """
     parsed_data = {}
     current_entity = None
     current_value = []

@@ -6,7 +6,6 @@ import grpc
 import transcribe_pb2
 import transcribe_pb2_grpc
 from whisper_hindi import HindiWhisperTranscribe
-from whisper import WhisperTranscribe
 from pydub import AudioSegment
 import asyncio
 from googletrans import Translator
@@ -15,10 +14,13 @@ logging.basicConfig(
     level=logging.INFO,
     format="%(asctime)s - %(levelname)s - %(message)s",
 )
+
+
 async def translate_text(text: str):
     async with Translator() as translator:
         result = await translator.translate(text, src="hindi", dest="english")
         return result.text
+
 
 class AudioServiceServicer(transcribe_pb2_grpc.AudioServiceServicer):
     def __init__(self) -> None:
@@ -71,9 +73,7 @@ class AudioServiceServicer(transcribe_pb2_grpc.AudioServiceServicer):
             self.logger.error(f"Error during transcription: {e}")
             # context.set_code(grpc.StatusCode.INTERNAL)
             # context.set_details(f"Error: {e}")
-            return transcribe_pb2.TranscribeResponse(
-                status="Error", message=str(e)
-            )
+            return transcribe_pb2.TranscribeResponse(status="Error", message=str(e))
 
 
 def serve():

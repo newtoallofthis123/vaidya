@@ -3,14 +3,12 @@
 import React, { useState, useRef } from "react";
 import { motion } from "motion/react";
 import { Button } from "@/components/ui/button";
-import { Mic } from "lucide-react";
 import ListeningAnimation from "@/components/custom/talking_circle";
 
 const AudioRecorder = () => {
   const [isRecording, setIsRecording] = useState(false);
-  const [audioURL, setAudioURL] = useState(null);
   const [message, setMessage] = useState("");
-  const mediaRecorderRef = useRef(null);
+  const mediaRecorderRef = useRef<MediaRecorder | null>(null);
   const audioChunksRef = useRef([]);
 
   const startRecording = async () => {
@@ -19,16 +17,14 @@ const AudioRecorder = () => {
       mediaRecorderRef.current = new MediaRecorder(stream);
       console.log("Recording started...");
 
-      mediaRecorderRef.current.ondataavailable = (event) => {
-        audioChunksRef.current.push(event.data);
+      mediaRecorderRef.current.ondataavailable = (event: BlobEvent) => {
+        audioChunksRef.current.push(event.data as never);
       };
 
       mediaRecorderRef.current.onstop = async () => {
         const audioBlob = new Blob(audioChunksRef.current, {
           type: "audio/wav",
         });
-        const url = URL.createObjectURL(audioBlob);
-        setAudioURL(url);
         audioChunksRef.current = [];
 
         console.log("Sending audio to server...");
@@ -49,7 +45,7 @@ const AudioRecorder = () => {
     }
   };
 
-  const sendAudioToServer = async (audioBlob) => {
+  const sendAudioToServer = async (audioBlob: Blob) => {
     try {
       const formData = new FormData();
       formData.append("content", audioBlob, "recording.wav");
