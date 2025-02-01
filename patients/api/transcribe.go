@@ -76,5 +76,11 @@ func (s *ApiServer) handleTranscribe(c *gin.Context) {
 		log.Fatalf("Failed to receive message: %v", err)
 	}
 
-	c.JSON(200, gin.H{"message": msg.Message})
+	symptoms, err := s.tokenizeText(msg.Message)
+	fmt.Println("Symptoms", symptoms)
+	if err != nil {
+		c.JSON(200, gin.H{"message": msg.Message, "symptoms": []string{}})
+	}
+
+	c.JSON(200, gin.H{"message": msg.Message, "symptoms": symptoms})
 }

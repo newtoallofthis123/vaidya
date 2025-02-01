@@ -2,7 +2,7 @@ import io
 import torch
 import numpy as np
 import soundfile as sf
-from transformers import WhisperProcessor, WhisperForConditionalGeneration
+from transformers import WhisperProcessor, WhisperForConditionalGeneration, AutoProcessor, AutoModelForSpeechSeq2Seq
 
 class WhisperTranscribe:
     def __init__(self) -> None:
@@ -12,7 +12,7 @@ class WhisperTranscribe:
         self.model.config.forced_decoder_ids = None
 
     def split_audio_into_chunks(self, audio_data, sample_rate, chunk_duration=30):
-        chunk_size = chunk_duration * sample_rate 
+        chunk_size = chunk_duration * sample_rate
         return [audio_data[i:i + chunk_size] for i in range(0, len(audio_data), chunk_size)]
 
     def transcribe_audio(self, chunk, sample_rate=16000):
@@ -32,4 +32,5 @@ class WhisperTranscribe:
             predicted_ids = self.model.generate(inputs["input_features"])
 
         transcription = self.processor.batch_decode(predicted_ids, skip_special_tokens=True)[0]
+        print(transcription)
         return transcription

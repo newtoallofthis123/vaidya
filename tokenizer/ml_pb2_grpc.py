@@ -5,7 +5,7 @@ import warnings
 
 import ml_pb2 as ml__pb2
 
-GRPC_GENERATED_VERSION = '1.69.0'
+GRPC_GENERATED_VERSION = '1.70.0'
 GRPC_VERSION = grpc.__version__
 _version_not_supported = False
 
@@ -34,10 +34,10 @@ class TokensServerStub(object):
         Args:
             channel: A grpc.Channel.
         """
-        self.FindSymptoms = channel.unary_stream(
+        self.FindSymptoms = channel.unary_unary(
                 '/TokensServer/FindSymptoms',
                 request_serializer=ml__pb2.SymptomsRequest.SerializeToString,
-                response_deserializer=ml__pb2.Symptom.FromString,
+                response_deserializer=ml__pb2.SymptomsResponse.FromString,
                 _registered_method=True)
         self.SayHello = channel.unary_unary(
                 '/TokensServer/SayHello',
@@ -64,10 +64,10 @@ class TokensServerServicer(object):
 
 def add_TokensServerServicer_to_server(servicer, server):
     rpc_method_handlers = {
-            'FindSymptoms': grpc.unary_stream_rpc_method_handler(
+            'FindSymptoms': grpc.unary_unary_rpc_method_handler(
                     servicer.FindSymptoms,
                     request_deserializer=ml__pb2.SymptomsRequest.FromString,
-                    response_serializer=ml__pb2.Symptom.SerializeToString,
+                    response_serializer=ml__pb2.SymptomsResponse.SerializeToString,
             ),
             'SayHello': grpc.unary_unary_rpc_method_handler(
                     servicer.SayHello,
@@ -96,12 +96,12 @@ class TokensServer(object):
             wait_for_ready=None,
             timeout=None,
             metadata=None):
-        return grpc.experimental.unary_stream(
+        return grpc.experimental.unary_unary(
             request,
             target,
             '/TokensServer/FindSymptoms',
             ml__pb2.SymptomsRequest.SerializeToString,
-            ml__pb2.Symptom.FromString,
+            ml__pb2.SymptomsResponse.FromString,
             options,
             channel_credentials,
             insecure,

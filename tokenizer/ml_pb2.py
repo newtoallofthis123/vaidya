@@ -24,21 +24,24 @@ _sym_db = _symbol_database.Default()
 
 
 
-DESCRIPTOR = _descriptor_pool.Default().AddSerializedFile(b'\n\x08ml.proto\"\x1c\n\x0cHelloRequest\x12\x0c\n\x04name\x18\x01 \x01(\t\"\x14\n\x05Hello\x12\x0b\n\x03res\x18\x01 \x01(\t\"\x1f\n\x0fSymptomsRequest\x12\x0c\n\x04text\x18\x01 \x01(\t\"F\n\x07Symptom\x12\x0c\n\x04type\x18\x01 \x01(\t\x12\x0c\n\x04name\x18\x02 \x01(\t\x12\x0b\n\x03loc\x18\x03 \x01(\t\x12\x12\n\nconfidence\x18\x04 \x01(\x02\x32_\n\x0cTokensServer\x12,\n\x0c\x46indSymptoms\x12\x10.SymptomsRequest\x1a\x08.Symptom0\x01\x12!\n\x08SayHello\x12\r.HelloRequest\x1a\x06.Hellob\x06proto3')
+DESCRIPTOR = _descriptor_pool.Default().AddSerializedFile(b'\n\x08ml.proto\"\x1c\n\x0cHelloRequest\x12\x0c\n\x04name\x18\x01 \x01(\t\"\x14\n\x05Hello\x12\x0b\n\x03res\x18\x01 \x01(\t\"\x1f\n\x0fSymptomsRequest\x12\x0c\n\x04text\x18\x01 \x01(\t\".\n\x10SymptomsResponse\x12\x1a\n\x08symptoms\x18\x01 \x03(\x0b\x32\x08.Symptom\"F\n\x07Symptom\x12\x0c\n\x04type\x18\x01 \x01(\t\x12\x0c\n\x04name\x18\x02 \x01(\t\x12\x0b\n\x03loc\x18\x03 \x01(\t\x12\x12\n\nconfidence\x18\x04 \x01(\x02\x32\x66\n\x0cTokensServer\x12\x33\n\x0c\x46indSymptoms\x12\x10.SymptomsRequest\x1a\x11.SymptomsResponse\x12!\n\x08SayHello\x12\r.HelloRequest\x1a\x06.HelloB-Z+github.com/newtoallofthis123/patients/typesb\x06proto3')
 
 _globals = globals()
 _builder.BuildMessageAndEnumDescriptors(DESCRIPTOR, _globals)
 _builder.BuildTopDescriptorsAndMessages(DESCRIPTOR, 'ml_pb2', _globals)
 if not _descriptor._USE_C_DESCRIPTORS:
-  DESCRIPTOR._loaded_options = None
+  _globals['DESCRIPTOR']._loaded_options = None
+  _globals['DESCRIPTOR']._serialized_options = b'Z+github.com/newtoallofthis123/patients/types'
   _globals['_HELLOREQUEST']._serialized_start=12
   _globals['_HELLOREQUEST']._serialized_end=40
   _globals['_HELLO']._serialized_start=42
   _globals['_HELLO']._serialized_end=62
   _globals['_SYMPTOMSREQUEST']._serialized_start=64
   _globals['_SYMPTOMSREQUEST']._serialized_end=95
-  _globals['_SYMPTOM']._serialized_start=97
-  _globals['_SYMPTOM']._serialized_end=167
-  _globals['_TOKENSSERVER']._serialized_start=169
-  _globals['_TOKENSSERVER']._serialized_end=264
+  _globals['_SYMPTOMSRESPONSE']._serialized_start=97
+  _globals['_SYMPTOMSRESPONSE']._serialized_end=143
+  _globals['_SYMPTOM']._serialized_start=145
+  _globals['_SYMPTOM']._serialized_end=215
+  _globals['_TOKENSSERVER']._serialized_start=217
+  _globals['_TOKENSSERVER']._serialized_end=319
 # @@protoc_insertion_point(module_scope)

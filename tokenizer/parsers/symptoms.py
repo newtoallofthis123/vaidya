@@ -31,7 +31,7 @@ class SymptomTokenizer:
 
         for token in tokens:
             tag = token['entity']
-            
+
             if tag.startswith('B'):
                 if cur is not None:
                     cur.append(token)
@@ -42,16 +42,16 @@ class SymptomTokenizer:
                 if cur is None:
                     raise ValueError("Found I-PROBLEM without preceding B-PROBLEM")
                 cur.append(token)
-            elif tag.startswith('E'):
+            elif tag.startswith('E') or tag.startswith('S'):
                 if cur is None:
                     cur = []
                 cur.append(token)
                 problems.append(cur)
                 cur = None
-        
+
         if cur is not None:
             raise ValueError("Unclosed B-PROBLEM at end of token list")
-            
+
         return problems
 
     def get_symptoms(self, text: str) -> dict[str, list[dict[str, str]]]:
@@ -65,6 +65,8 @@ class SymptomTokenizer:
             dict: Dictionary containing lists of symptoms, treatments, and tests.
         """
         tokens = self.tokenize_text(text)
+
+        print(tokens)
 
         entites = self.group_entities(tokens)
 

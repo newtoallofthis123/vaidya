@@ -1,7 +1,9 @@
 syntax = "proto3";
 
+option go_package = "github.com/newtoallofthis123/patients/types";
+
 service TokensServer {
-  rpc FindSymptoms(SymptomsRequest) returns (stream Symptom);
+  rpc FindSymptoms(SymptomsRequest) returns (SymptomsResponse);
   rpc SayHello(HelloRequest) returns (Hello);
 }
 
@@ -10,6 +12,10 @@ message HelloRequest { string name = 1; }
 message Hello { string res = 1; }
 
 message SymptomsRequest { string text = 1; }
+
+message SymptomsResponse {
+    repeated Symptom symptoms = 1;
+}
 
 message Symptom {
   string type = 1;

@@ -39,6 +39,11 @@ func (s *Store) InitTables() error {
 		created_at timestamp default now()
 	);
 
+	CREATE TABLE IF NOT EXISTS doctors(
+		id text primary key,
+		name text
+	);
+
 	CREATE TABLE IF NOT EXISTS sessions(
 		id text primary key,
 		doctor_id text REFERENCES doctors(id),

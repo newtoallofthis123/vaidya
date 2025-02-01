@@ -5,19 +5,25 @@ import wave
 import grpc
 import transcribe_pb2
 import transcribe_pb2_grpc
+from whisper_hindi import HindiWhisperTranscribe
 from whisper import WhisperTranscribe
 from pydub import AudioSegment
+import asyncio
+from googletrans import Translator
 
 logging.basicConfig(
     level=logging.INFO,
     format="%(asctime)s - %(levelname)s - %(message)s",
 )
-
+async def translate_text(text: str):
+    async with Translator() as translator:
+        result = await translator.translate(text, src="hindi", dest="english")
+        return result.text
 
 class AudioServiceServicer(transcribe_pb2_grpc.AudioServiceServicer):
     def __init__(self) -> None:
         self.logger = logging.getLogger(__name__)
-        self.transcriber = WhisperTranscribe()
+        self.transcriber = HindiWhisperTranscribe()
 
     def cal_chunk_size(self, audio_data, seconds=30):
         try:
@@ -50,13 +56,15 @@ class AudioServiceServicer(transcribe_pb2_grpc.AudioServiceServicer):
                 wave_data = wave_data[chunk_size:]
 
                 self.logger.info("Transcribing 30-second chunk...")
-                transcription = self.transcriber.transcribe_audio(chunk)
+                transcription = str(self.transcriber.transcribe_audio(chunk))
                 text += transcription
 
             if wave_data:
                 self.logger.info("Transcribing remaining audio...")
-                text += self.transcriber.transcribe_audio(wave_data)
+                text += str(self.transcriber.transcribe_audio(wave_data))
 
+            print(text)
+            text = asyncio.run(translate_text(text))
             print(text)
             return transcribe_pb2.TranscribeResponse(status="Success", message=text)
         except Exception as e:
