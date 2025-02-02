@@ -14,7 +14,10 @@ const AudioRecorder = () => {
   const startRecording = async () => {
     try {
       const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-      mediaRecorderRef.current = new MediaRecorder(stream);
+      mediaRecorderRef.current = new MediaRecorder(stream, {
+        mimeType: "audio/webm",
+        audioBitsPerSecond: 16000,
+      });
       console.log("Recording started...");
 
       mediaRecorderRef.current.ondataavailable = (event: BlobEvent) => {
@@ -23,7 +26,7 @@ const AudioRecorder = () => {
 
       mediaRecorderRef.current.onstop = async () => {
         const audioBlob = new Blob(audioChunksRef.current, {
-          type: "audio/wav",
+          type: "audio/webm",
         });
         audioChunksRef.current = [];
 
