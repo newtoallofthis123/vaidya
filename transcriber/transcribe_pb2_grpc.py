@@ -39,12 +39,23 @@ class AudioServiceStub(object):
                 request_serializer=transcribe__pb2.AudioFile.SerializeToString,
                 response_deserializer=transcribe__pb2.TranscribeResponse.FromString,
                 _registered_method=True)
+        self.HindiTranscribeAudio = channel.stream_unary(
+                '/AudioService/HindiTranscribeAudio',
+                request_serializer=transcribe__pb2.AudioFile.SerializeToString,
+                response_deserializer=transcribe__pb2.HindiTranscribeResponse.FromString,
+                _registered_method=True)
 
 
 class AudioServiceServicer(object):
     """Missing associated documentation comment in .proto file."""
 
     def TranscribeAudio(self, request_iterator, context):
+        """Missing associated documentation comment in .proto file."""
+        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+        context.set_details('Method not implemented!')
+        raise NotImplementedError('Method not implemented!')
+
+    def HindiTranscribeAudio(self, request_iterator, context):
         """Missing associated documentation comment in .proto file."""
         context.set_code(grpc.StatusCode.UNIMPLEMENTED)
         context.set_details('Method not implemented!')
@@ -57,6 +68,11 @@ def add_AudioServiceServicer_to_server(servicer, server):
                     servicer.TranscribeAudio,
                     request_deserializer=transcribe__pb2.AudioFile.FromString,
                     response_serializer=transcribe__pb2.TranscribeResponse.SerializeToString,
+            ),
+            'HindiTranscribeAudio': grpc.stream_unary_rpc_method_handler(
+                    servicer.HindiTranscribeAudio,
+                    request_deserializer=transcribe__pb2.AudioFile.FromString,
+                    response_serializer=transcribe__pb2.HindiTranscribeResponse.SerializeToString,
             ),
     }
     generic_handler = grpc.method_handlers_generic_handler(
@@ -86,6 +102,33 @@ class AudioService(object):
             '/AudioService/TranscribeAudio',
             transcribe__pb2.AudioFile.SerializeToString,
             transcribe__pb2.TranscribeResponse.FromString,
+            options,
+            channel_credentials,
+            insecure,
+            call_credentials,
+            compression,
+            wait_for_ready,
+            timeout,
+            metadata,
+            _registered_method=True)
+
+    @staticmethod
+    def HindiTranscribeAudio(request_iterator,
+            target,
+            options=(),
+            channel_credentials=None,
+            call_credentials=None,
+            insecure=False,
+            compression=None,
+            wait_for_ready=None,
+            timeout=None,
+            metadata=None):
+        return grpc.experimental.stream_unary(
+            request_iterator,
+            target,
+            '/AudioService/HindiTranscribeAudio',
+            transcribe__pb2.AudioFile.SerializeToString,
+            transcribe__pb2.HindiTranscribeResponse.FromString,
             options,
             channel_credentials,
             insecure,

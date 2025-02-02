@@ -12,6 +12,13 @@ message AudioFile {
 
 service AudioService {
   rpc TranscribeAudio(stream AudioFile) returns (TranscribeResponse);
+  rpc HindiTranscribeAudio(stream AudioFile) returns (HindiTranscribeResponse);
+}
+
+message HindiTranscribeResponse {
+  string status = 1;
+  string message = 2;
+  string original = 3;
 }
 
 message TranscribeResponse {

@@ -18,6 +18,16 @@ class AudioFile(_message.Message):
     audio_data: bytes
     def __init__(self, filename: _Optional[str] = ..., format: _Optional[str] = ..., sample_rate: _Optional[int] = ..., channels: _Optional[int] = ..., audio_data: _Optional[bytes] = ...) -> None: ...
 
+class HindiTranscribeResponse(_message.Message):
+    __slots__ = ("status", "message", "original")
+    STATUS_FIELD_NUMBER: _ClassVar[int]
+    MESSAGE_FIELD_NUMBER: _ClassVar[int]
+    ORIGINAL_FIELD_NUMBER: _ClassVar[int]
+    status: str
+    message: str
+    original: str
+    def __init__(self, status: _Optional[str] = ..., message: _Optional[str] = ..., original: _Optional[str] = ...) -> None: ...
+
 class TranscribeResponse(_message.Message):
     __slots__ = ("status", "message")
     STATUS_FIELD_NUMBER: _ClassVar[int]

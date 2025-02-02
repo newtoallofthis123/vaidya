@@ -19,7 +19,8 @@ import (
 const _ = grpc.SupportPackageIsVersion9
 
 const (
-	AudioService_TranscribeAudio_FullMethodName = "/AudioService/TranscribeAudio"
+	AudioService_TranscribeAudio_FullMethodName      = "/AudioService/TranscribeAudio"
+	AudioService_HindiTranscribeAudio_FullMethodName = "/AudioService/HindiTranscribeAudio"
 )
 
 // AudioServiceClient is the client API for AudioService service.
@@ -27,6 +28,7 @@ const (
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 type AudioServiceClient interface {
 	TranscribeAudio(ctx context.Context, opts ...grpc.CallOption) (grpc.ClientStreamingClient[AudioFile, TranscribeResponse], error)
+	HindiTranscribeAudio(ctx context.Context, opts ...grpc.CallOption) (grpc.ClientStreamingClient[AudioFile, HindiTranscribeResponse], error)
 }
 
 type audioServiceClient struct {
@@ -50,11 +52,25 @@ func (c *audioServiceClient) TranscribeAudio(ctx context.Context, opts ...grpc.C
 // This type alias is provided for backwards compatibility with existing code that references the prior non-generic stream type by name.
 type AudioService_TranscribeAudioClient = grpc.ClientStreamingClient[AudioFile, TranscribeResponse]
 
+func (c *audioServiceClient) HindiTranscribeAudio(ctx context.Context, opts ...grpc.CallOption) (grpc.ClientStreamingClient[AudioFile, HindiTranscribeResponse], error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	stream, err := c.cc.NewStream(ctx, &AudioService_ServiceDesc.Streams[1], AudioService_HindiTranscribeAudio_FullMethodName, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	x := &grpc.GenericClientStream[AudioFile, HindiTranscribeResponse]{ClientStream: stream}
+	return x, nil
+}
+
+// This type alias is provided for backwards compatibility with existing code that references the prior non-generic stream type by name.
+type AudioService_HindiTranscribeAudioClient = grpc.ClientStreamingClient[AudioFile, HindiTranscribeResponse]
+
 // AudioServiceServer is the server API for AudioService service.
 // All implementations must embed UnimplementedAudioServiceServer
 // for forward compatibility.
 type AudioServiceServer interface {
 	TranscribeAudio(grpc.ClientStreamingServer[AudioFile, TranscribeResponse]) error
+	HindiTranscribeAudio(grpc.ClientStreamingServer[AudioFile, HindiTranscribeResponse]) error
 	mustEmbedUnimplementedAudioServiceServer()
 }
 
@@ -67,6 +83,9 @@ type UnimplementedAudioServiceServer struct{}
 
 func (UnimplementedAudioServiceServer) TranscribeAudio(grpc.ClientStreamingServer[AudioFile, TranscribeResponse]) error {
 	return status.Errorf(codes.Unimplemented, "method TranscribeAudio not implemented")
+}
+func (UnimplementedAudioServiceServer) HindiTranscribeAudio(grpc.ClientStreamingServer[AudioFile, HindiTranscribeResponse]) error {
+	return status.Errorf(codes.Unimplemented, "method HindiTranscribeAudio not implemented")
 }
 func (UnimplementedAudioServiceServer) mustEmbedUnimplementedAudioServiceServer() {}
 func (UnimplementedAudioServiceServer) testEmbeddedByValue()                      {}
@@ -96,6 +115,13 @@ func _AudioService_TranscribeAudio_Handler(srv interface{}, stream grpc.ServerSt
 // This type alias is provided for backwards compatibility with existing code that references the prior non-generic stream type by name.
 type AudioService_TranscribeAudioServer = grpc.ClientStreamingServer[AudioFile, TranscribeResponse]
 
+func _AudioService_HindiTranscribeAudio_Handler(srv interface{}, stream grpc.ServerStream) error {
+	return srv.(AudioServiceServer).HindiTranscribeAudio(&grpc.GenericServerStream[AudioFile, HindiTranscribeResponse]{ServerStream: stream})
+}
+
+// This type alias is provided for backwards compatibility with existing code that references the prior non-generic stream type by name.
+type AudioService_HindiTranscribeAudioServer = grpc.ClientStreamingServer[AudioFile, HindiTranscribeResponse]
+
 // AudioService_ServiceDesc is the grpc.ServiceDesc for AudioService service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -107,6 +133,11 @@ var AudioService_ServiceDesc = grpc.ServiceDesc{
 		{
 			StreamName:    "TranscribeAudio",
 			Handler:       _AudioService_TranscribeAudio_Handler,
+			ClientStreams: true,
+		},
+		{
+			StreamName:    "HindiTranscribeAudio",
+			Handler:       _AudioService_HindiTranscribeAudio_Handler,
 			ClientStreams: true,
 		},
 	},
