@@ -69,6 +69,7 @@ func (s *ApiServer) Run() error {
 	})
 
 	r.POST("/transcribe", s.handleTranscribe)
+	r.POST("/summary", s.handleGetSummary)
 
 	err := r.Run(s.env.ListenAddr)
 	return err
