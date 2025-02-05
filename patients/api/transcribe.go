@@ -5,40 +5,26 @@ import (
 	"fmt"
 	"io"
 	"log"
+	"mime/multipart"
 
-	"github.com/gin-gonic/gin"
 	"github.com/newtoallofthis123/patients/types"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
 )
 
-func (s *ApiServer) handleTranscribe(c *gin.Context) {
+func (s *ApiServer) transcribe(file multipart.File) (string, error) {
 	var opts []grpc.DialOption
 	opts = append(opts, grpc.WithTransportCredentials(insecure.NewCredentials()))
 	conn, err := grpc.NewClient("localhost:50052", opts...)
 	if err != nil {
 		s.logger.Error("Unable to read content file with err: " + err.Error())
-		c.JSON(500, gin.H{"err": "Unable to read file: " + err.Error()})
-		return
+		return "", err
 	}
 	defer conn.Close()
 
-	fileHeader, err := c.FormFile("content")
-	if err != nil {
-		c.JSON(500, gin.H{"err": "Unable to read file: " + err.Error()})
-		return
-	}
-
-	file, err := fileHeader.Open()
-	if err != nil {
-		c.JSON(500, gin.H{"err": "Unable to read file: " + err.Error()})
-		return
-	}
-	defer file.Close()
 	content, err := io.ReadAll(file)
 	if err != nil {
-		c.JSON(500, gin.H{"err": "Unable to read file: " + err.Error()})
-		return
+		return "", err
 	}
 
 	fmt.Println("Trying to connect to microservice")
@@ -46,8 +32,7 @@ func (s *ApiServer) handleTranscribe(c *gin.Context) {
 	stream, err := client.TranscribeAudio(context.Background())
 	if err != nil {
 		s.logger.Error("Unable to read content file with err: " + err.Error())
-		c.JSON(500, gin.H{"err": "Unable to connect to microservice: " + err.Error()})
-		return
+		return "", err
 	}
 	fmt.Println("Connected to microservice")
 
@@ -59,7 +44,7 @@ func (s *ApiServer) handleTranscribe(c *gin.Context) {
 		buff = content[i : i+1024*5]
 
 		err = stream.Send(&types.AudioFile{
-			Filename:  fileHeader.Filename,
+			Filename:  "",
 			Format:    "ogg",
 			AudioData: buff,
 		})
@@ -76,11 +61,5 @@ func (s *ApiServer) handleTranscribe(c *gin.Context) {
 		log.Fatalf("Failed to receive message: %v", err)
 	}
 
-	symptoms, err := s.tokenizeText(msg.Message)
-	fmt.Println("Symptoms", symptoms)
-	if err != nil {
-		c.JSON(200, gin.H{"message": msg.Message, "symptoms": []string{}})
-	}
-
-	c.JSON(200, gin.H{"message": msg.Message, "symptoms": symptoms})
+	return msg.Message, nil
 }

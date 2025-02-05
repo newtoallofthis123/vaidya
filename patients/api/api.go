@@ -15,7 +15,7 @@ type ApiServer struct {
 	store  *db.Store
 	env    *utils.Env
 	logger *slog.Logger
-	subs   map[*websocket.Conn]bool
+	subs   map[*websocket.Conn][]int
 }
 
 var upgrader = websocket.Upgrader{
@@ -43,7 +43,7 @@ func NewApiServer(env *utils.Env) (*ApiServer, error) {
 		store:  &store,
 		env:    env,
 		logger: logger,
-		subs:   make(map[*websocket.Conn]bool),
+		subs:   make(map[*websocket.Conn][]int),
 	}, nil
 }
 
@@ -68,8 +68,7 @@ func (s *ApiServer) Run() error {
 		})
 	})
 
-	r.POST("/transcribe", s.handleTranscribe)
-	r.POST("/summary", s.handleGetSummary)
+	r.GET("/talk", s.handleTalk)
 
 	err := r.Run(s.env.ListenAddr)
 	return err
