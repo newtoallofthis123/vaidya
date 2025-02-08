@@ -1,3 +1,1 @@
-export default function PatientForm({patient}) {
-
-}
+export default function PatientForm({ patient }) {}

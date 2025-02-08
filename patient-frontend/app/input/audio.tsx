@@ -4,6 +4,7 @@ import React, { useState, useRef } from "react";
 import { motion } from "motion/react";
 import { Button } from "@/components/ui/button";
 import ListeningAnimation from "@/components/custom/talking_circle";
+import { BACKEND_API_URL } from "@/lib/consts";
 
 const AudioRecorder = () => {
   const [isRecording, setIsRecording] = useState(false);
@@ -53,7 +54,7 @@ const AudioRecorder = () => {
       const formData = new FormData();
       formData.append("content", audioBlob, "recording.wav");
 
-      const response = await fetch("http://192.168.0.128:8000/transcribe", {
+      const response = await fetch(`${BACKEND_API_URL}/transcribe`, {
         method: "POST",
         body: formData,
       });
@@ -66,7 +67,7 @@ const AudioRecorder = () => {
         window.localStorage.setItem("description", data.message);
         window.localStorage.setItem("symptoms", JSON.stringify(data.symptoms));
 
-        const parsed = await fetch("http://192.168.0.128:5000/tokenize", {
+        const parsed = await fetch(`${BACKEND_API_URL}/tokenize`, {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
@@ -147,7 +148,7 @@ const AudioRecorder = () => {
             <p className="text-xl">Captured Message!</p>
             <Button className="mt-2 p-2">
               <a href="/form" className="text-xl">
-                See Form
+                Continue
               </a>
             </Button>
           </div>
