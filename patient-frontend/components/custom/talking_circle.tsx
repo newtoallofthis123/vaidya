@@ -1,6 +1,6 @@
 import { motion } from "motion/react";
 
-export default function EnterAnimation() {
+export default function TalkingAnimation() {
   return (
     <motion.div
       initial={{ scale: 1 }}
