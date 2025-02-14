@@ -1,21 +1,24 @@
 package api
 
 import (
+	"context"
 	"log/slog"
 	"net/http"
 	"os"
 
 	"github.com/gin-gonic/gin"
+	"github.com/google/generative-ai-go/genai"
 	"github.com/gorilla/websocket"
 	"github.com/newtoallofthis123/patients/db"
 	"github.com/newtoallofthis123/patients/utils"
 )
 
 type ApiServer struct {
-	store  *db.Store
-	env    *utils.Env
-	logger *slog.Logger
-	subs   map[*websocket.Conn][]int
+	store      *db.Store
+	env        *utils.Env
+	logger     *slog.Logger
+	subs       map[*websocket.Conn]*genai.ChatSession
+	sessionCtx map[*genai.ChatSession]context.Context
 }
 
 var upgrader = websocket.Upgrader{
@@ -40,10 +43,11 @@ func NewApiServer(env *utils.Env) (*ApiServer, error) {
 	logger := slog.New(slog.NewTextHandler(os.Stderr, nil))
 
 	return &ApiServer{
-		store:  &store,
-		env:    env,
-		logger: logger,
-		subs:   make(map[*websocket.Conn][]int),
+		store:      &store,
+		env:        env,
+		logger:     logger,
+		subs:       make(map[*websocket.Conn]*genai.ChatSession),
+		sessionCtx: make(map[*genai.ChatSession]context.Context),
 	}, nil
 }
 
@@ -69,6 +73,7 @@ func (s *ApiServer) Run() error {
 	})
 
 	r.GET("/talk", s.handleTalk)
+	r.POST("/transcribe", s.handleTranscribe)
 
 	err := r.Run(s.env.ListenAddr)
 	return err

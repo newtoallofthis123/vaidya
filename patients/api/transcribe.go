@@ -7,10 +7,34 @@ import (
 	"log"
 	"mime/multipart"
 
+	"github.com/gin-gonic/gin"
 	"github.com/newtoallofthis123/patients/types"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
 )
+
+func (s *ApiServer) handleTranscribe(c *gin.Context) {
+	fileHeader, err := c.FormFile("content")
+	if err != nil {
+		c.JSON(500, gin.H{"err": "Unable to read file: " + err.Error()})
+		return
+	}
+
+	file, err := fileHeader.Open()
+	if err != nil {
+		c.JSON(500, gin.H{"err": "Unable to read file: " + err.Error()})
+		return
+	}
+	defer file.Close()
+
+	msg, err := s.transcribe(file)
+	if err != nil {
+		c.JSON(500, gin.H{"err": "Unable to read file: " + err.Error()})
+		return
+	}
+
+	c.JSON(200, gin.H{"msg": msg})
+}
 
 func (s *ApiServer) transcribe(file multipart.File) (string, error) {
 	var opts []grpc.DialOption
@@ -40,8 +64,8 @@ func (s *ApiServer) transcribe(file multipart.File) (string, error) {
 	buff := make([]byte, 1024*5)
 	fmt.Println(len(content))
 
-	for i := 0; i < len(content); i += 1024 * 5 {
-		buff = content[i : i+1024*5]
+	for i := 0; i < len(content); i += 1024 {
+		buff = content[i : i+1024]
 
 		err = stream.Send(&types.AudioFile{
 			Filename:  "",

@@ -3,20 +3,14 @@ package api
 import (
 	"context"
 	"log"
+	"net/http"
+	"net/url"
 
 	"github.com/ollama/ollama/api"
 )
 
-func (s *ApiServer) talk(prompt string, userCtx []int) (api.GenerateResponse, error) {
-	client, err := api.ClientFromEnvironment()
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	req := &api.GenerateRequest{
-		Model:  "qwen2.5:3b",
-		Prompt: prompt,
-		System: `You are an information extraction model for electronic medical records. 
+func systemPrompt() string {
+	return `You are an information extraction model for electronic medical records. 
 Your task is to extract relevant medical and personal information from a given sentence and then interactively ask questions to fill in any missing fields. 
 Always follow these rules:
 1. First, extract as much information as possible from the initial sentence.
@@ -24,86 +18,88 @@ Always follow these rules:
 3. Ask questions in a polite and helpful manner.
 4. Continue asking questions until all fields are filled or the user declines to answer.
 Once all fields are filled, output:
-<success>Ok</success>
+{
+    "success": "ok"
+}
 5. Do not assume or hallucinate information not present in the sentence or user responses.
 6. Format the output as follows:
 
-<think>
-[Your thought process and explanations]
-</think>
-
-<Info>
 {
-  "name": "extracted name",
-  "age": "extracted age",
-  "gender": "extracted or inferred gender",
-  "address": "extracted address",
-  "identity": "extracted identity",
-  "phone": "extracted phone number",
-  "problems": [
-    {
-      "name": "symptom name",
-      "duration": "duration of symptom",
-      "description": "description regarding the symptom"
-    }
-  ],
-  "conditions": ["list of pre-existing conditions"],
-  "description": "[AI GENERATED] Medically sounding description",
-  "recommended_doctor": "[AI GENERATED] Suggested medical specialty"
+    "think": "[Your thought process and explanations]",
+    "info": {
+      "name": "extracted name",
+      "age": "extracted age",
+      "gender": "extracted or inferred gender",
+      "address": "extracted address",
+      "identity": "extracted identity",
+      "phone": "extracted phone number",
+      "problems": [
+        {
+          "name": "symptom name",
+          "duration": "duration of symptom",
+          "description": "description regarding the symptom"
+        }
+      ],
+      "conditions": ["list of pre-existing conditions"],
+      "description": "[AI GENERATED] Medically sounding description",
+      "recommended_doctor": "[AI GENERATED] Suggested medical specialty"
+    },
+    "next_question": "[Your next question]"
 }
-</Info>
-
-<next>
-[Your next question]
-</next>
 
 Example interaction:
 
 Initial input: "Hello, my name is Ishan. I am living here in Hyderabad and I am suffering from fever, headache, and cold. I also have diabetes."
 
-<think>
-First, I will extract the information from the initial sentence.
-</think>
-
-<Info>
 {
-  "name": "Ishan",
-  "age": "",
-  "gender": "Male",
-  "address": "Hyderabad",
-  "identity": "",
-  "phone": "",
-  "problems": [
-    {
-      "name": "fever",
-      "duration": "",
-      "description": "High fever"
+    "think": "First, I will extract the information from the initial sentence.",
+    "info": {
+      "name": "Ishan",
+      "age": "",
+      "gender": "Male",
+      "address": "Hyderabad",
+      "identity": "",
+      "phone": "",
+      "problems": [
+        {
+          "name": "fever",
+          "duration": "",
+          "description": "High fever"
+        },
+        {
+          "name": "headache",
+          "duration": "",
+          "description": "Headache localized in the forehead"
+        },
+        {
+          "name": "cold",
+          "duration": "",
+          "description": "",
+        }
+      ],
+      "conditions": ["diabetes"],
+      "description": "[AI GENERATED] A male patient presenting with fever, headache, and cold symptoms, with a known diagnosis of diabetes.",
+      "recommended_doctor": "[AI GENERATED] General Physician or Infectious Disease Specialist",
     },
-    {
-      "name": "headache",
-      "duration": "",
-      "description": "Headache localized in the forehead"
-    },
-    {
-      "name": "cold",
-      "duration": "",
-      "description": "",
-    }
-  ],
-  "conditions": ["diabetes"],
-  "description": "[AI GENERATED] A male patient presenting with fever, headache, and cold symptoms, with a known diagnosis of diabetes.",
-  "recommended_doctor": "[AI GENERATED] General Physician or Infectious Disease Specialist"
+    "analysis": "The following fields are missing: age, phone, symptom description, and identity.",
+    "next_question": "Please share your age"
 }
-</Info>
 
-<think>
-The following fields are missing: age, phone, symptom description, and identity.
-</think>
+Now process this [INPUT_SENTENCE]`
+}
 
-<next>
-Could you please share your age?
-</next>
-`,
+func (s *ApiServer) talk(prompt string, userCtx []int) (api.GenerateResponse, error) {
+	url, err := url.Parse("http://192.168.0.106:11434/")
+	client := api.NewClient(url, http.DefaultClient)
+	if err != nil {
+		log.Fatal(err)
+	}
+	log.Println("Connected to the server")
+
+	req := &api.GenerateRequest{
+		Model:  "qwen2.5:3b",
+		Prompt: prompt,
+		System: systemPrompt(),
 
 		Stream:  new(bool),
 		Context: userCtx,
@@ -111,6 +107,7 @@ Could you please share your age?
 
 	var res api.GenerateResponse
 	ctx := context.Background()
+	log.Println("Sending request to the server")
 	respFunc := func(resp api.GenerateResponse) error {
 		res = resp
 		return nil
@@ -120,6 +117,7 @@ Could you please share your age?
 	if err != nil {
 		return api.GenerateResponse{}, err
 	}
+	log.Println("Received response from the server")
 
 	return res, nil
 }
