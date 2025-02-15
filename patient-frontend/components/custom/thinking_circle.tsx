@@ -1,6 +1,6 @@
 import { motion } from "motion/react";
 
-export default function TalkingAnimation({
+export default function ThinkingAnimation({
   bg = "#1700ee",
   fg = "white",
   children,
@@ -19,14 +19,16 @@ export default function TalkingAnimation({
     justifyContent: "center",
     color: fg,
     fontSize: "1.5em",
-    cursor: "pointer",
   };
   return (
     <motion.div
-      initial={{ scale: 1 }}
-      animate={{ scale: [1, 1.1, 0.9, 1] }}
+      initial={{ y: 0 }}
+      animate={{
+        y: [0, -10, 0, 10, 0],
+        rotate: [0, 2, 0, -2, 0], // Subtle rotation
+      }}
       transition={{
-        duration: 1,
+        duration: 2,
         repeat: Infinity,
         repeatType: "loop",
         ease: "easeInOut",
