@@ -163,13 +163,21 @@ const Conversation = () => {
               <div>
                 {isRecording ? (
                   <div onClick={stopRecording}>
-                    <ListeningAnimation bg="#000000" fg="#ffffff">
+                    <ListeningAnimation
+                      running={true}
+                      bg="#000000"
+                      fg="#ffffff"
+                    >
                       <StopCircleIcon size={40} />
                     </ListeningAnimation>
                   </div>
                 ) : (
                   <div onClick={startRecording}>
-                    <ListeningAnimation bg="#000000" fg="#ffffff">
+                    <ListeningAnimation
+                      running={false}
+                      bg="#000000"
+                      fg="#ffffff"
+                    >
                       <MicIcon size={40} />
                     </ListeningAnimation>
                   </div>

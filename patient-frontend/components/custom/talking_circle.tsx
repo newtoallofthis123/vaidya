@@ -3,10 +3,12 @@ import { motion } from "motion/react";
 export default function TalkingAnimation({
   bg = "#1700ee",
   fg = "white",
+  running = true,
   children,
 }: {
   bg: string | null;
   fg: string | null;
+  running: boolean;
   children: React.ReactNode;
 }) {
   const ball = {
@@ -24,7 +26,7 @@ export default function TalkingAnimation({
   return (
     <motion.div
       initial={{ scale: 1 }}
-      animate={{ scale: [1, 1.1, 0.9, 1] }}
+      animate={{ scale: running ? [1, 1.1, 0.9, 1] : 1 }}
       transition={{
         duration: 1,
         repeat: Infinity,

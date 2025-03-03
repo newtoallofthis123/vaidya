@@ -39,6 +39,7 @@ func (s *ApiServer) handleTalk(c *gin.Context) {
 	model.SetTopP(0.95)
 	model.SetMaxOutputTokens(8192)
 	model.ResponseMIMEType = "application/json"
+	missing := ""
 
 	ses := model.StartChat()
 	for {
@@ -56,7 +57,11 @@ func (s *ApiServer) handleTalk(c *gin.Context) {
 		}
 
 		fmt.Println("Sending message to Gemini")
-		resp, err := ses.SendMessage(ctx, genai.Text(string(prompt)))
+		strPrompt := string(prompt)
+		if missing != "" {
+			strPrompt += fmt.Sprintf("\n\nThe field %s is missing", missing)
+		}
+		resp, err := ses.SendMessage(ctx, genai.Text(strPrompt))
 		if err != nil {
 			log.Printf("Error reading message: %v", err)
 			break
@@ -74,10 +79,40 @@ func (s *ApiServer) handleTalk(c *gin.Context) {
 		fmt.Println(res)
 
 		parsed, err := parseToJSON(res)
+		if err != nil {
+			log.Printf("Error parsing response: %v", err)
+			break
+		}
 		parsedJson, _ := json.Marshal(parsed)
-		log.Println("Parsed response, writing message")
+		missing = checkMissingFields(parsed.Info)
+		log.Println("Parsed response, writing message, missing fields:", missing)
 		conn.WriteMessage(websocket.TextMessage, []byte(parsedJson))
 	}
+}
+
+func checkMissingFields(info PatientInfo) string {
+	if info.Name == "" {
+		return "name"
+	}
+	if info.Age == "" {
+		return "age"
+	}
+	if info.Phone == "" {
+		return "phone"
+	}
+	if info.Description == "" {
+		return "description"
+	}
+	if info.Identity == "" {
+		return "identity"
+	}
+	if len(info.Problems) == 0 {
+		return "problems"
+	}
+	if len(info.Conditions) == 0 {
+		return "conditions"
+	}
+	return "OK"
 }
 
 type ParsedResponse struct {
