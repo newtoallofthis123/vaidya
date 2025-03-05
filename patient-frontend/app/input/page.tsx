@@ -3,7 +3,6 @@
 import { useState, useRef, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import ListeningAnimation from "@/components/custom/talking_circle";
-import { BACKEND_API_URL, BACKEND_HOST_URL } from "@/lib/consts";
 import WavingEmoji from "@/components/custom/wavingemoji";
 import ThinkingAnimation from "@/components/custom/thinking_circle";
 import { MicIcon, StopCircleIcon } from "lucide-react";
@@ -25,6 +24,8 @@ const Conversation = () => {
   const audioChunksRef = useRef([]);
   const sockRef = useRef<WebSocket | null>(null);
   const [thinking, setThinking] = useState(false);
+
+  const BACKEND_URL = process.env.NEXT_PUBLIC_BACKEND_URL;
 
   function convertToFormData(data): InitialPatientFormData {
     const problems = [];
@@ -48,8 +49,8 @@ const Conversation = () => {
   }
 
   useEffect(() => {
-    sockRef.current = new WebSocket(`ws://${BACKEND_HOST_URL}/talk`);
-  }, [sockRef]);
+    sockRef.current = new WebSocket(`ws://${BACKEND_URL}/talk`);
+  }, [sockRef, BACKEND_URL]);
 
   sockRef.current?.addEventListener("message", (event) => {
     console.log("Received message from server:", event.data);
@@ -112,7 +113,7 @@ const Conversation = () => {
       const formData = new FormData();
       formData.append("content", audioBlob, "recording.wav");
 
-      const response = await fetch(`${BACKEND_API_URL}/transcribe`, {
+      const response = await fetch(`http://${BACKEND_URL}/transcribe`, {
         method: "POST",
         body: formData,
       });
