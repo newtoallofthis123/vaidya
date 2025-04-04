@@ -35,28 +35,10 @@ func (s *Store) InitTables() error {
 		conditions text,
 		problems text,
 		description text not null,
+		medicines text DEFAULT '',
+		diagnosis text DEFAULT '',
+		next_session text DEFAULT '',
 		created_at timestamp default now()
-	);
-
-	CREATE TABLE IF NOT EXISTS doctors(
-		id text primary key,
-		name text
-	);
-
-	CREATE TABLE IF NOT EXISTS sessions(
-		id text primary key,
-		doctor_id text REFERENCES doctors(id),
-		curr_time timestamp not null,
-		recommended boolean default false
-	);
-
-	CREATE TABLE IF NOT EXISTS records(
-		id text primary key,
-		patient_id text REFERENCES patients(id),
-		session_id text REFERENCES sessions(id),
-		medicines text not null,
-		diagnosis text not null,
-		next_session text REFERENCES sessions(id) DEFAULT null
 	);
 	`
 

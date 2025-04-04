@@ -1,19 +1,19 @@
 "use client";
-import { useForm, Controller } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
-import * as z from "zod";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
-import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
-import { Label } from "@/components/ui/label";
 import {
   Card,
+  CardContent,
+  CardDescription,
   CardHeader,
   CardTitle,
-  CardDescription,
-  CardContent,
 } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import { Textarea } from "@/components/ui/textarea";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { Controller, useForm } from "react-hook-form";
+import * as z from "zod";
 import { AutoExpandingInputGroup } from "./AutoExpandingInputGroup";
 
 const patientSchema = z.object({
@@ -31,17 +31,37 @@ const patientSchema = z.object({
   diagnosis: z.string(),
   next_session: z
     .string()
-    .regex(/^\d{4}-\d{2}-\d{2}$/, "Invalid date format (YYYY-MM-DD)"),
+    .regex(/^\d{4}-\d{2}-\d{2}$/, "Invalid date format (YYYY-MM-DD)")
+    .default(new Date().toISOString().split("T")[0])
+    .optional(),
 });
 
 export type PatientFormData = z.infer<typeof patientSchema>;
 
 interface EMRFormProps {
   initialData?: Partial<PatientFormData>;
-  onSubmit: (data: PatientFormData) => void;
 }
 
-export function EMRForm({ initialData, onSubmit }: EMRFormProps) {
+async function onSubmit(data: PatientFormData) {
+  console.log(data);
+  const BACKEND_URL = process.env.NEXT_PUBLIC_BACKEND_URL;
+  const finalData: unknown = data;
+  finalData["problems"] = JSON.stringify(finalData["problems"]);
+  finalData["conditions"] = JSON.stringify(finalData["conditions"]);
+  finalData["medicines"] = JSON.stringify(finalData["medicines"]);
+  const res = await fetch(`http://${BACKEND_URL}/patients/${data.patient_id}`, {
+    method: "PUT",
+    body: JSON.stringify(data),
+    headers: {
+      "Content-Type": "application/json",
+    },
+  });
+
+  const result = await res.json();
+  console.log("Patient Updated:", result);
+}
+
+export function EMRForm({ initialData }: EMRFormProps) {
   const {
     register,
     handleSubmit,
@@ -61,21 +81,10 @@ export function EMRForm({ initialData, onSubmit }: EMRFormProps) {
     <Card className="w-full max-w-4xl mx-auto p-4">
       <CardHeader>
         <CardTitle>Electronic Medical Record</CardTitle>
-        <CardDescription>Enter patient information</CardDescription>
+        <CardDescription>Patient #{initialData.patient_id}</CardDescription>
       </CardHeader>
       <CardContent>
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
-          <div className="grid grid-cols-2 gap-6">
-            <div>
-              <Label htmlFor="patient_id">Patient ID</Label>
-              <Input id="patient_id" {...register("patient_id")} />
-              {errors.patient_id && (
-                <p className="text-red-500 text-sm">
-                  {errors.patient_id.message}
-                </p>
-              )}
-            </div>
-          </div>
           <div className="grid grid-cols-2 gap-6">
             <div>
               <Label htmlFor="name">Name</Label>

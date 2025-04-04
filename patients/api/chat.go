@@ -11,7 +11,7 @@ Always follow these rules:
 Once all fields are filled, append
 {
     "success": "ok"
-} 
+}
 to the output.
 5. Do not assume or hallucinate information not present in the sentence or user responses.
 6. Format the output as follows:

@@ -3,6 +3,8 @@
 import { useEffect, useState } from "react";
 import { useParams } from "next/navigation";
 import { EMRForm, PatientFormData } from "@/components/EMRForm";
+import Link from "next/link";
+import { Bot } from "lucide-react";
 
 const PatientPage = () => {
   const params = useParams();
@@ -13,7 +15,7 @@ const PatientPage = () => {
     const fetchPatient = async () => {
       try {
         const response = await fetch(
-          `http://${BACKEND_URL}/patients/${params.id}`
+          `http://${BACKEND_URL}/patients/${params.id}`,
         );
         if (!response.ok) {
           throw new Error("Failed to fetch patient data");
@@ -24,6 +26,9 @@ const PatientPage = () => {
         }
         if (data["conditions"]) {
           data["conditions"] = JSON.parse(data["conditions"]);
+        }
+        if (data["medicines"]) {
+          data["medicines"] = JSON.parse(data["medicines"]);
         }
         setPatientData(data);
       } catch (error) {
@@ -38,13 +43,16 @@ const PatientPage = () => {
     return <div>Loading...</div>;
   }
 
-  function submit(data: PatientFormData) {
-    console.log(data);
-  }
-
   return (
     <div className="py-4">
-      <EMRForm onSubmit={submit} initialData={patientData} />
+      <Link
+        href={`/chat/${params.id}`}
+        className="fixed bottom-6 right-6 p-4 rounded-full shadow-lg hover:bg-primary/50 transition-colors"
+        aria-label="Open Chat"
+      >
+        <Bot />
+      </Link>
+      <EMRForm initialData={patientData} />
     </div>
   );
 };

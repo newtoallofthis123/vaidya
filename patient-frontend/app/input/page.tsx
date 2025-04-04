@@ -9,16 +9,26 @@ import { MicIcon, StopCircleIcon } from "lucide-react";
 import { useSearchParams } from "next/navigation";
 import { InitialForm, InitialPatientFormData } from "@/components/InitialForm";
 
+const speak = (text) => {
+  if ("speechSynthesis" in window) {
+    const utterance = new SpeechSynthesisUtterance(text);
+    window.speechSynthesis.speak(utterance);
+    console.log("Inited");
+  } else {
+    console.log("Speech synthesis not supported");
+  }
+};
+
 const Conversation = () => {
   // read query params
   const params = useSearchParams();
 
   const [isRecording, setIsRecording] = useState(false);
   const [message, setMessage] = useState("");
-  const [response, setResponse] = useState("");
+  const [next, setNext] = useState("");
   const [form, setForm] = useState<InitialPatientFormData>();
   const [page, setPage] = useState(
-    params.get("page") ? parseInt(params.get("page")) : 0
+    params.get("page") ? parseInt(params.get("page")) : 0,
   );
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
   const audioChunksRef = useRef([]);
@@ -66,6 +76,7 @@ const Conversation = () => {
     } else {
       console.log("No save point found");
     }
+    speak("Hello World");
   }, [sockRef, BACKEND_URL]);
 
   sockRef.current?.addEventListener("message", (event) => {
@@ -73,10 +84,17 @@ const Conversation = () => {
     const parsed = JSON.parse(event.data);
     setThinking(false);
     setPage(2);
-    setResponse(parsed);
     setThoughts(parsed["thoughts"]);
+    const nextQuestion = parsed["next_question"]
+      .replace("/\n/g", "")
+      .replace("/\t/g", "");
+    setNext(nextQuestion);
+
     const parsedData = convertToFormData(parsed["info"]);
     setForm(parsedData);
+
+    speak(next + thoughts);
+
     if (!parsed["next_question"] || parsed["success"] === "ok") {
       submit(parsedData);
     }
@@ -172,6 +190,7 @@ const Conversation = () => {
     const result = await res.json();
     console.log("Patient created:", result);
     window.localStorage.removeItem("pdata");
+    window.location.href = "/patients/" + result.id;
   }
 
   return (
@@ -234,12 +253,7 @@ const Conversation = () => {
             <div className="border-black p-4 h-1/2">
               <h1 className="text-3xl font-bold">Response</h1>
               <p className="text-xl pt-3">{thoughts}</p>
-              <p className="text-xl pt-3">
-                {response["next_question"] &&
-                  response["next_question"]
-                    .replace("/\n/g", "")
-                    .replace("/\t/g", "")}{" "}
-              </p>
+              <p className="text-xl pt-3">{next}</p>
               <Button
                 onClick={() => {
                   setPage(1);

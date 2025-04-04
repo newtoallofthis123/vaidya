@@ -23,12 +23,7 @@ type Patient struct {
 	Conditions  string `json:"conditions,omitempty"`
 	Problems    string `json:"problems,omitempty"`
 	Description string `json:"description,omitempty"`
-}
-
-type PatientRecord struct {
-	Patient     Patient `json:"patient,omitempty"`
-	SessionID   string  `json:"session_id,omitempty"`
-	Medicines   string  `json:"medicines,omitempty"`
-	Diagnosis   string  `json:"diagnosis,omitempty"`
-	NextSession string  `json:"next_session,omitempty"`
+	Medicines   string `json:"medicines,omitempty"`
+	Diagnosis   string `json:"diagnosis,omitempty"`
+	NextSession string `json:"next_session,omitempty"`
 }

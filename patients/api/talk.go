@@ -57,10 +57,12 @@ func (s *ApiServer) handleTalk(c *gin.Context) {
 		}
 
 		fmt.Println("Sending message to Gemini")
-		strPrompt := string(prompt)
+		strPrompt := "This is the patient message and the current form: "
+		strPrompt += string(prompt)
 		if missing != "" {
 			strPrompt += fmt.Sprintf("\n\nThe field %s is missing", missing)
 		}
+		print(strPrompt)
 		resp, err := ses.SendMessage(ctx, genai.Text(strPrompt))
 		if err != nil {
 			log.Printf("Error reading message: %v", err)

@@ -6,6 +6,7 @@ import (
 	"net/http"
 	"os"
 
+	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
 	"github.com/google/generative-ai-go/genai"
 	"github.com/gorilla/websocket"
@@ -53,6 +54,10 @@ func NewApiServer(env *utils.Env) (*ApiServer, error) {
 
 func (s *ApiServer) Run() error {
 	r := gin.Default()
+	config := cors.DefaultConfig()
+	config.AllowAllOrigins = true
+	r.Use(cors.New(config))
+
 	r.SetTrustedProxies(nil)
 
 	r.Use(func(c *gin.Context) {
@@ -78,6 +83,7 @@ func (s *ApiServer) Run() error {
 	p := r.Group("/patients")
 	p.POST("/create", s.handlePatientCreate)
 	p.GET("/:id", s.handlePatientGet)
+	p.PUT("/:id", s.handlePatientUpdate)
 
 	err := r.Run(s.env.ListenAddr)
 	return err
