@@ -5,7 +5,6 @@ import * as z from "zod";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import { Checkbox } from "@/components/ui/checkbox";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Label } from "@/components/ui/label";
 import {
@@ -19,16 +18,13 @@ import { AutoExpandingInputGroup } from "./AutoExpandingInputGroup";
 
 const patientSchema = z.object({
   patient_id: z.string().min(1, "Patient ID is required"),
-  first_name: z.string().min(1, "First name is required"),
-  last_name: z.string().min(1, "Last name is required"),
+  name: z.string().min(1, "First name is required"),
   age: z.number().min(0).max(150),
-  gender: z.enum(["male", "female", "other"]),
+  gender: z.enum(["Male", "Female", "Other"]),
   address: z.string().min(1, "Address is required"),
   identity: z.string().min(1, "Identity is required"),
   phone: z.string().regex(/^\+?[1-9]\d{1,14}$/, "Invalid phone number"),
-  email: z.string().email("Invalid email address"),
   description: z.string(),
-  recurring: z.boolean(),
   problems: z.array(z.string()),
   medicines: z.array(z.string()),
   conditions: z.array(z.string()),
@@ -62,14 +58,14 @@ export function EMRForm({ initialData, onSubmit }: EMRFormProps) {
   });
 
   return (
-    <Card className="w-full max-w-2xl mx-auto">
+    <Card className="w-full max-w-4xl mx-auto p-4">
       <CardHeader>
         <CardTitle>Electronic Medical Record</CardTitle>
         <CardDescription>Enter patient information</CardDescription>
       </CardHeader>
       <CardContent>
-        <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
-          <div className="grid grid-cols-2 gap-4">
+        <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
+          <div className="grid grid-cols-2 gap-6">
             <div>
               <Label htmlFor="patient_id">Patient ID</Label>
               <Input id="patient_id" {...register("patient_id")} />
@@ -79,24 +75,13 @@ export function EMRForm({ initialData, onSubmit }: EMRFormProps) {
                 </p>
               )}
             </div>
-            <div>
-              <Label htmlFor="first_name">First Name</Label>
-              <Input id="first_name" {...register("first_name")} />
-              {errors.first_name && (
-                <p className="text-red-500 text-sm">
-                  {errors.first_name.message}
-                </p>
-              )}
-            </div>
           </div>
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-2 gap-6">
             <div>
-              <Label htmlFor="last_name">Last Name</Label>
-              <Input id="last_name" {...register("last_name")} />
-              {errors.last_name && (
-                <p className="text-red-500 text-sm">
-                  {errors.last_name.message}
-                </p>
+              <Label htmlFor="name">Name</Label>
+              <Input id="last_name" {...register("name")} />
+              {errors.name && (
+                <p className="text-red-500 text-sm">{errors.name.message}</p>
               )}
             </div>
             <div>
@@ -123,15 +108,15 @@ export function EMRForm({ initialData, onSubmit }: EMRFormProps) {
                   className="flex space-x-4"
                 >
                   <div className="flex items-center space-x-2">
-                    <RadioGroupItem value="male" id="male" />
+                    <RadioGroupItem value="Male" id="male" />
                     <Label htmlFor="male">Male</Label>
                   </div>
                   <div className="flex items-center space-x-2">
-                    <RadioGroupItem value="female" id="female" />
+                    <RadioGroupItem value="Female" id="female" />
                     <Label htmlFor="female">Female</Label>
                   </div>
                   <div className="flex items-center space-x-2">
-                    <RadioGroupItem value="other" id="other" />
+                    <RadioGroupItem value="Other" id="other" />
                     <Label htmlFor="other">Other</Label>
                   </div>
                 </RadioGroup>
@@ -148,7 +133,7 @@ export function EMRForm({ initialData, onSubmit }: EMRFormProps) {
               <p className="text-red-500 text-sm">{errors.address.message}</p>
             )}
           </div>
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-2 gap-6">
             <div>
               <Label htmlFor="identity">Identity</Label>
               <Input id="identity" {...register("identity")} />
@@ -167,13 +152,6 @@ export function EMRForm({ initialData, onSubmit }: EMRFormProps) {
             </div>
           </div>
           <div>
-            <Label htmlFor="email">Email</Label>
-            <Input id="email" type="email" {...register("email")} />
-            {errors.email && (
-              <p className="text-red-500 text-sm">{errors.email.message}</p>
-            )}
-          </div>
-          <div>
             <Label htmlFor="description">Description</Label>
             <Textarea id="description" {...register("description")} />
             {errors.description && (
@@ -181,10 +159,6 @@ export function EMRForm({ initialData, onSubmit }: EMRFormProps) {
                 {errors.description.message}
               </p>
             )}
-          </div>
-          <div className="flex items-center space-x-2">
-            <Checkbox id="recurring" {...register("recurring")} />
-            <Label htmlFor="recurring">Recurring Patient</Label>
           </div>
           <AutoExpandingInputGroup
             control={control}
@@ -194,15 +168,15 @@ export function EMRForm({ initialData, onSubmit }: EMRFormProps) {
           />
           <AutoExpandingInputGroup
             control={control}
-            name="medicines"
-            label="Medicines"
-            error={errors.medicines}
-          />
-          <AutoExpandingInputGroup
-            control={control}
             name="conditions"
             label="Conditions"
             error={errors.conditions}
+          />
+          <AutoExpandingInputGroup
+            control={control}
+            name="medicines"
+            label="Medicines"
+            error={errors.medicines}
           />
           <div>
             <Label htmlFor="diagnosis">Diagnosis</Label>
@@ -224,7 +198,7 @@ export function EMRForm({ initialData, onSubmit }: EMRFormProps) {
               </p>
             )}
           </div>
-          <Button type="submit" className="w-full">
+          <Button type="submit" className="w-full mt-4">
             Submit
           </Button>
         </form>

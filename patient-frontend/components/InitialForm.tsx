@@ -20,7 +20,7 @@ import { AutoExpandingInputGroup } from "./AutoExpandingInputGroup";
 const patientSchema = z.object({
   name: z.string().min(1, "Name is required"),
   age: z.number().min(0).max(150),
-  gender: z.enum(["male", "female", "other"]),
+  gender: z.enum(["Male", "Female", "Other"]),
   address: z.string().min(1, "Address is required"),
   identity: z.string().min(1, "Identity is required"),
   phone: z.string().regex(/^\+?[1-9]\d{1,14}$/, "Invalid phone number"),
@@ -33,7 +33,7 @@ export type InitialPatientFormData = z.infer<typeof patientSchema>;
 
 interface InitialFormProps {
   initialData?: Partial<InitialPatientFormData>;
-  onSubmit: (data: InitialPatientFormData) => void;
+  onSubmit: (data: Partial<InitialPatientFormData>) => void;
 }
 
 export function InitialForm({ initialData, onSubmit }: InitialFormProps) {
@@ -52,7 +52,7 @@ export function InitialForm({ initialData, onSubmit }: InitialFormProps) {
   });
 
   return (
-    <Card className="w-full max-w-2xl mx-auto">
+    <Card className="w-full max-w-3xl mx-auto text-xl">
       <CardHeader>
         <CardTitle>Electronic Medical Record</CardTitle>
         <CardDescription>Enter patient information</CardDescription>
@@ -91,16 +91,16 @@ export function InitialForm({ initialData, onSubmit }: InitialFormProps) {
                   className="flex space-x-4"
                 >
                   <div className="flex items-center space-x-2">
-                    <RadioGroupItem value="male" id="male" />
-                    <Label htmlFor="male">Male</Label>
+                    <RadioGroupItem value="Male" id="male" />
+                    <Label htmlFor="Male">Male</Label>
                   </div>
                   <div className="flex items-center space-x-2">
-                    <RadioGroupItem value="female" id="female" />
-                    <Label htmlFor="female">Female</Label>
+                    <RadioGroupItem value="Female" id="female" />
+                    <Label htmlFor="Female">Female</Label>
                   </div>
                   <div className="flex items-center space-x-2">
-                    <RadioGroupItem value="other" id="other" />
-                    <Label htmlFor="other">Other</Label>
+                    <RadioGroupItem value="Other" id="other" />
+                    <Label htmlFor="Other">Other</Label>
                   </div>
                 </RadioGroup>
               )}

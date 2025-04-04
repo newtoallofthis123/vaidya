@@ -60,17 +60,15 @@ func (s *ApiServer) transcribe(file multipart.File) (string, error) {
 	}
 	fmt.Println("Connected to microservice")
 
-	// send 5kb buffer at a time
-	buff := make([]byte, 1024*5)
 	fmt.Println(len(content))
 
 	for i := 0; i < len(content); i += 1024 {
-		buff = content[i : i+1024]
+		chunk := content[i:min(i+1024, len(content))]
 
 		err = stream.Send(&types.AudioFile{
 			Filename:  "",
 			Format:    "ogg",
-			AudioData: buff,
+			AudioData: chunk,
 		})
 		if err != nil {
 			s.logger.Error("Unable to read content file with err: " + err.Error())
@@ -86,4 +84,11 @@ func (s *ApiServer) transcribe(file multipart.File) (string, error) {
 	}
 
 	return msg.Message, nil
+}
+
+func min(a, b int) int {
+	if a < b {
+		return a
+	}
+	return b
 }

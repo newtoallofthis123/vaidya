@@ -75,6 +75,10 @@ func (s *ApiServer) Run() error {
 	r.GET("/talk", s.handleTalk)
 	r.POST("/transcribe", s.handleTranscribe)
 
+	p := r.Group("/patients")
+	p.POST("/create", s.handlePatientCreate)
+	p.GET("/:id", s.handlePatientGet)
+
 	err := r.Run(s.env.ListenAddr)
 	return err
 }

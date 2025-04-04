@@ -26,16 +26,15 @@ func (s *Store) InitTables() error {
 	query := `
 	CREATE TABLE IF NOT EXISTS patients(
 		id text primary key,
-		first_name text not null,
-		last_name text,
+		name text not null,
 		age int not null,
 		gender text not null,
 		address text,
 		identity text,
 		phone text,
-		email text,
+		conditions text,
+		problems text,
 		description text not null,
-		recurring boolean default false,
 		created_at timestamp default now()
 	);
 
@@ -55,9 +54,7 @@ func (s *Store) InitTables() error {
 		id text primary key,
 		patient_id text REFERENCES patients(id),
 		session_id text REFERENCES sessions(id),
-		problems text not null,
 		medicines text not null,
-		conditions text not null,
 		diagnosis text not null,
 		next_session text REFERENCES sessions(id) DEFAULT null
 	);

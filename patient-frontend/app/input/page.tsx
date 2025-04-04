@@ -18,12 +18,13 @@ const Conversation = () => {
   const [response, setResponse] = useState("");
   const [form, setForm] = useState<InitialPatientFormData>();
   const [page, setPage] = useState(
-    params.get("page") ? parseInt(params.get("page")) : 0,
+    params.get("page") ? parseInt(params.get("page")) : 0
   );
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
   const audioChunksRef = useRef([]);
   const sockRef = useRef<WebSocket | null>(null);
   const [thinking, setThinking] = useState(false);
+  const [thoughts, setThoughts] = useState<string>("");
 
   const BACKEND_URL = process.env.NEXT_PUBLIC_BACKEND_URL;
 
@@ -31,7 +32,11 @@ const Conversation = () => {
     const problems = [];
     if (data["problems"]) {
       for (const problem of data["problems"]) {
-        problems.push(problem["name"]);
+        if (typeof problem === "string") {
+          problems.push(problem);
+        } else {
+          problems.push(problem["name"]);
+        }
       }
     }
 
@@ -48,8 +53,19 @@ const Conversation = () => {
     };
   }
 
+  function saveToLocalStorage(data: InitialPatientFormData) {
+    window.localStorage.setItem("pdata", JSON.stringify(data));
+  }
+
   useEffect(() => {
     sockRef.current = new WebSocket(`ws://${BACKEND_URL}/talk`);
+    const initialData = JSON.parse(window.localStorage.getItem("pdata"));
+    if (initialData) {
+      setForm(convertToFormData(initialData));
+      setPage(2);
+    } else {
+      console.log("No save point found");
+    }
   }, [sockRef, BACKEND_URL]);
 
   sockRef.current?.addEventListener("message", (event) => {
@@ -58,7 +74,13 @@ const Conversation = () => {
     setThinking(false);
     setPage(2);
     setResponse(parsed);
-    setForm(convertToFormData(parsed["info"]));
+    setThoughts(parsed["thoughts"]);
+    const parsedData = convertToFormData(parsed["info"]);
+    setForm(parsedData);
+    if (!parsed["next_question"] || parsed["success"] === "ok") {
+      submit(parsedData);
+    }
+    saveToLocalStorage(parsedData);
   });
 
   sockRef.current?.addEventListener("open", () => {
@@ -124,7 +146,7 @@ const Conversation = () => {
         console.log(data);
         setMessage(data.msg);
         console.log(data.msg);
-        sockRef.current?.send(data.msg);
+        sockRef.current?.send(data.msg + " " + JSON.stringify(form));
       } else {
         setMessage("Failed to upload audio.");
       }
@@ -134,8 +156,22 @@ const Conversation = () => {
     }
   };
 
-  function submit(data: InitialPatientFormData) {
+  async function submit(data: InitialPatientFormData) {
     console.log(data);
+    const finalData: unknown = data;
+    finalData["problems"] = JSON.stringify(finalData["problems"]);
+    finalData["conditions"] = JSON.stringify(finalData["conditions"]);
+    const res = await fetch(`http://${BACKEND_URL}/patients/create`, {
+      method: "POST",
+      body: JSON.stringify(data),
+      headers: {
+        "Content-Type": "application/json",
+      },
+    });
+
+    const result = await res.json();
+    console.log("Patient created:", result);
+    window.localStorage.removeItem("pdata");
   }
 
   return (
@@ -196,17 +232,22 @@ const Conversation = () => {
               <p className="text-xl pt-3">{message}</p>
             </div>
             <div className="border-black p-4 h-1/2">
-              <h1 className="text-3xl font-bold">Next Question</h1>
+              <h1 className="text-3xl font-bold">Response</h1>
+              <p className="text-xl pt-3">{thoughts}</p>
               <p className="text-xl pt-3">
-                {" "}
                 {response["next_question"] &&
                   response["next_question"]
                     .replace("/\n/g", "")
                     .replace("/\t/g", "")}{" "}
-                ?
               </p>
-              <Button onClick={() => setPage(1)} className="text-2xl p-6 mt-4">
-                Continue
+              <Button
+                onClick={() => {
+                  setPage(1);
+                  startRecording();
+                }}
+                className="text-2xl p-6 mt-4"
+              >
+                Respond
               </Button>
             </div>
           </div>

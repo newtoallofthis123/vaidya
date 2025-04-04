@@ -116,10 +116,11 @@ func checkMissingFields(info PatientInfo) string {
 }
 
 type ParsedResponse struct {
-	Think        string      `json:"think,omitempty"`
+	Thoughts     string      `json:"thoughts,omitempty"`
 	Analysis     string      `json:"analysis,omitempty"`
 	Info         PatientInfo `json:"info,omitempty"`
 	NextQuestion string      `json:"next_question,omitempty"`
+	Success      string      `json:"success,omitempty"`
 }
 
 type PatientInfo struct {
